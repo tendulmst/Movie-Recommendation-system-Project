@@ -1,6 +1,7 @@
+import hashlib
 import re
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 PROMO_WORDS = {
@@ -151,4 +152,110 @@ def analyze_review_text(text: str) -> FakeReviewResult:
             "emoji_count": emojis,
         },
     )
+
+
+_DEMO_AUTHORS = (
+    "Alex M.",
+    "Jordan K.",
+    "Sam R.",
+    "Taylor P.",
+    "Casey L.",
+    "Morgan D.",
+    "Riley N.",
+    "Jamie W.",
+)
+
+_DEMO_REVIEWS_TRUSTED = (
+    "The second act slows down, but strong performances and thoughtful direction kept me engaged through the end.",
+    "Not perfect — a few plot holes — yet the score and visuals make it a solid weekend watch.",
+    "I liked how the film balances humor with quieter character moments; felt genuine rather than formulaic.",
+    "Cinematography stands out, especially in the night scenes. Pacing could be tighter in the middle.",
+    "Went in skeptical and left impressed. The lead chemistry carries scenes that would otherwise feel thin.",
+    "A mature take on the genre. The ending is bittersweet but earned, not just shock value.",
+)
+
+_DEMO_REVIEWS_SUSPICIOUS = (
+    "BEST MOVIE EVER!!! MUST WATCH!!! Click www.free-tickets.com for AMAZING deals!!!",
+    "Amazing awesome excellent superb mind blowing!!! Subscribe now for more reviews!!!",
+    "So good!!!",
+    "HIGHLY RECOMMENDED!!! Best movie ever!!! DM me on telegram for full list!!!",
+    "Worth watching!!! Guaranteed 5 stars!!! Promo code inside — click the link!!!",
+    "Mind blowing amazing excellent!!! Free download at www.example.com!!!",
+)
+
+
+def _seed_for_title(title: str) -> int:
+    return int(hashlib.md5((title or "").strip().lower().encode("utf-8")).hexdigest()[:8], 16)
+
+
+def get_demo_reviews_for_movie(movie_title: str, count: int = 8) -> List[Dict[str, str]]:
+    """Deterministic sample reviews for a movie (demo / offline dataset)."""
+    seed = _seed_for_title(movie_title)
+    trusted = list(_DEMO_REVIEWS_TRUSTED)
+    suspicious = list(_DEMO_REVIEWS_SUSPICIOUS)
+    n_trusted = 4 + (seed % 3)
+    n_suspicious = max(2, count - n_trusted)
+    n_trusted = min(n_trusted, count - 2)
+
+    picked: List[Dict[str, str]] = []
+    for i in range(n_trusted):
+        text = trusted[(seed + i * 3) % len(trusted)]
+        author = _DEMO_AUTHORS[i % len(_DEMO_AUTHORS)]
+        picked.append({"author": author, "text": text, "source": "community"})
+
+    for j in range(n_suspicious):
+        text = suspicious[(seed + j * 5 + 1) % len(suspicious)]
+        author = _DEMO_AUTHORS[(n_trusted + j) % len(_DEMO_AUTHORS)]
+        picked.append({"author": author, "text": text, "source": "community"})
+
+    return picked[:count]
+
+
+def analyze_movie_reviews(
+    movie_title: str,
+    extra_reviews: Optional[List[Dict[str, str]]] = None,
+) -> Dict[str, Any]:
+    """Analyze all reviews for a movie; split into trusted vs likely fake."""
+    raw_items = get_demo_reviews_for_movie(movie_title)
+    if extra_reviews:
+        for item in extra_reviews:
+            if item and (item.get("text") or "").strip():
+                raw_items.append(
+                    {
+                        "author": item.get("author") or "You",
+                        "text": (item.get("text") or "").strip(),
+                        "source": item.get("source") or "session",
+                    }
+                )
+
+    analyzed: List[Dict[str, Any]] = []
+    for item in raw_items:
+        result = analyze_review_text(item["text"])
+        analyzed.append(
+            {
+                "author": item.get("author") or "Anonymous",
+                "text": item["text"],
+                "source": item.get("source") or "community",
+                "label": result.label,
+                "score": round(result.score, 3),
+                "score_pct": round(result.score * 100),
+                "reasons": result.reasons,
+            }
+        )
+
+    trusted = [r for r in analyzed if r["label"] == "real"]
+    fake = [r for r in analyzed if r["label"] == "fake"]
+    total = len(analyzed)
+
+    return {
+        "movie_title": movie_title,
+        "total": total,
+        "trusted_count": len(trusted),
+        "fake_count": len(fake),
+        "trusted_reviews": trusted,
+        "fake_reviews": fake,
+        "has_fake_warning": len(fake) > 0,
+        "fake_pct": round(100 * len(fake) / total) if total else 0,
+        "trusted_pct": round(100 * len(trusted) / total) if total else 0,
+    }
 

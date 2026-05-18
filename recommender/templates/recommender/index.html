@@ -312,8 +312,8 @@
             font-size: 1rem;
             font-weight: 500;
             color: white;
-            background:#334155;
-            border: none;
+            background:transparent;
+            border: 1px solid gray;
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: var(--transition);
@@ -644,42 +644,6 @@
                 🎬 Search for a movie
             </label>
 
-            <div style="display:flex; justify-content:center; margin: 0.25rem 0 1rem;">
-                <a href="/fake-review/" style="
-                    display:inline-flex;
-                    align-items:center;
-                    gap:0.5rem;
-                    padding:0.55rem 0.9rem;
-                    border-radius:999px;
-                    border:1px solid rgba(146, 224, 232, 0.65);
-                    color: rgb(146, 224, 232);
-                    text-decoration:none;
-                    background: rgba(0,0,0,0.18);
-                    backdrop-filter: blur(10px);
-                    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                    font-weight: 600;
-                ">
-                    🛡️ Fake Review Detector
-                </a>
-                <a href="/assistant/" style="
-                    margin-left:0.6rem;
-                    display:inline-flex;
-                    align-items:center;
-                    gap:0.5rem;
-                    padding:0.55rem 0.9rem;
-                    border-radius:999px;
-                    border:1px solid rgba(146, 224, 232, 0.65);
-                    color: rgb(146, 224, 232);
-                    text-decoration:none;
-                    background: rgba(0,0,0,0.18);
-                    backdrop-filter: blur(10px);
-                    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                    font-weight: 600;
-                ">
-                    💬 AI Movie Assistant
-                </a>
-            </div>
-            
             <form method="POST" id="searchForm">
                 {% csrf_token %}
                 <div class="search-container">
@@ -712,8 +676,11 @@
                     <p class="voice-status" id="voiceStatus" role="status" aria-live="polite"></p>
                 </div>
                 
+                <p style="text-align:center; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 0.75rem;">
+                    🛡️ Search a movie — fake review check runs on the results page
+                </p>
                 <button type="submit" class="search-button" id="searchButton">
-                    Get Recommendations
+                    Search &amp; Analyze Reviews
                 </button>
             </form>
 
@@ -723,7 +690,10 @@
                 <strong>{{ error_message }}</strong>
             </div>
             {% endif %}
+
         </div>
+
+        {% include "recommender/chat_entry.html" %}
 
         <div class="features">
             <div class="feature-card">

@@ -1,0 +1,51 @@
+{# Home page only — link to dedicated AI assistant page #}
+<a href="{% url 'recommender:chat_assistant_page' %}" class="ai-chat-entry" id="chatAssistantCard">
+    <span class="ai-chat-entry-icon" aria-hidden="true">💬</span>
+    <span class="ai-chat-entry-text">
+        <strong>AI Chatbot Assistant</strong>
+        <small>Opens a new page with all smart features</small>
+    </span>
+    <span class="ai-chat-entry-arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+.ai-chat-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid rgba(146, 224, 232, 0.45);
+    background: rgba(30, 41, 59, 0.65);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: border-color 0.25s, background 0.25s, transform 0.2s;
+}
+.ai-chat-entry:hover {
+    border-color: rgb(146, 224, 232);
+    background: rgba(30, 41, 59, 0.88);
+    transform: translateY(-2px);
+}
+.ai-chat-entry-icon { font-size: 1.75rem; line-height: 1; }
+.ai-chat-entry-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.ai-chat-entry-text strong {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+    font-size: 1.08rem;
+    color: rgb(146, 224, 232);
+}
+.ai-chat-entry-text small {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+}
+.ai-chat-entry-arrow {
+    font-size: 1.25rem;
+    color: rgb(146, 224, 232);
+    font-weight: 700;
+}
+</style>

@@ -44,9 +44,8 @@
             min-height: 100vh;
             line-height: 1.65;
             background-color: var(--ink);
-            background-image:
-                linear-gradient(165deg, rgba(8, 6, 12, 0.88) 0%, rgba(18, 10, 8, 0.82) 45%, rgba(6, 8, 18, 0.9) 100%),
-                url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2400&q=80');
+            background-image:url("{% static 'images/back2.jpg' %}");
+                
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -74,7 +73,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(10, 8, 14, 0.65);
+            background:  transparent;
             backdrop-filter: blur(16px) saturate(1.2);
             -webkit-backdrop-filter: blur(16px) saturate(1.2);
             border-bottom: 1px solid var(--glass-border);
@@ -141,7 +140,7 @@
         }
 
         .content-panel {
-            background: var(--surface);
+            background: transparent;
             backdrop-filter: blur(20px) saturate(1.15);
             -webkit-backdrop-filter: blur(20px) saturate(1.15);
             border: 1px solid var(--glass-border);
@@ -204,7 +203,7 @@
 
         /* Movie Card */
         .movie-card {
-            background: var(--surface-elevated);
+            background:  transparent;
             border-radius: var(--border-radius);
             padding: 1.6rem 1.65rem;
             border: 1px solid var(--glass-border);
@@ -588,6 +587,278 @@
             font-size: 3.5rem;
             margin-bottom: 1rem;
         }
+
+        /* Fake review workflow */
+        .workflow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem 1rem;
+            margin-bottom: 1.75rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .workflow-step {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .workflow-step.active {
+            color: rgb(146, 224, 232);
+            font-weight: 600;
+        }
+
+        .workflow-step.done {
+            color: #7dd3a0;
+        }
+
+        .review-detector-block {
+            margin-bottom: 2.25rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .detector-card {
+            background:  transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem 1.35rem;
+        }
+
+        .detector-title {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detector-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .detector-loading {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            color: var(--text-secondary);
+        }
+
+        .detector-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(146, 224, 232, 0.25);
+            border-top-color: rgb(146, 224, 232);
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .detector-results {
+            display: none;
+        }
+
+        .detector-results.visible {
+            display: block;
+            animation: fadeInDown 0.55s ease-out;
+        }
+
+        .detector-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-pill {
+            text-align: center;
+            padding: 0.85rem 0.65rem;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-pill .num {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .stat-pill.trusted .num { color: #7dd3a0; }
+        .stat-pill.fake .num { color: #f87171; }
+
+        .review-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .review-item {
+            padding: 1rem 1.1rem;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.18);
+        }
+
+        .review-item.trusted {
+            border-left: 3px solid #7dd3a0;
+        }
+
+        .review-item.fake {
+            border-left: 3px solid #f87171;
+        }
+
+        .review-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 0.75rem;
+            margin-bottom: 0.45rem;
+            font-size: 0.85rem;
+        }
+
+        .review-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .review-badge.good {
+            background: rgba(125, 211, 160, 0.2);
+            color: #7dd3a0;
+        }
+
+        .review-badge.bad {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+
+        .review-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .review-reasons {
+            margin-top: 0.45rem;
+            font-size: 0.8rem;
+            color: #fbbf24;
+        }
+
+        .fake-warning-banner {
+            display: none;
+            margin-top: 1.25rem;
+            padding: 1rem 1.15rem;
+            border-radius: var(--border-radius-sm);
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            color: #fecaca;
+        }
+
+        .fake-warning-banner.visible {
+            display: block;
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .fake-warning-banner strong {
+            color: #fca5a5;
+        }
+
+        .show-recs-wrap {
+            display: none;
+            text-align: center;
+            margin: 1.5rem 0 0.5rem;
+            padding-top: 0.5rem;
+        }
+
+        .show-recs-wrap.visible {
+            display: block;
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .show-recs-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.95rem 2rem;
+            font-family: var(--font-ui);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #071018;
+            background: rgb(146, 224, 232);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 8px 28px rgba(146, 224, 232, 0.25);
+        }
+
+        .show-recs-btn:hover {
+            background: #a8eef5;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px rgba(146, 224, 232, 0.35);
+        }
+
+        .show-recs-hint {
+            margin-top: 0.65rem;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .recommendations-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+        }
+
+        .recommendations-section.revealed {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .recommendations-section .section-divider {
+            text-align: center;
+            margin: 0 0 2rem;
+            padding-top: 0.5rem;
+        }
+
+        .recommendations-section .section-divider h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.35rem, 3vw, 1.85rem);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -610,7 +881,7 @@
             <div class="content-panel">
                 <header class="results-header">
                     <h1 class="results-title">
-                        Movies like <span class="searched-movie">{{ input_movie_name }}</span>
+                        <span class="searched-movie">{{ input_movie_name }}</span>
                     </h1>
                     {% if source_movie %}
                     <p class="results-subtitle">
@@ -618,7 +889,108 @@
                     </p>
                     {% endif %}
                     <p class="results-subtitle">
-                        We found {{ total_recommendations|default:"15" }} amazing recommendations for you
+                        Review trust check, then personalized recommendations
+                    </p>
+                </header>
+
+                <div class="workflow-steps" aria-label="Analysis workflow">
+                    <span class="workflow-step active" id="stepSearch">✓ Search</span>
+                    <span class="workflow-step" id="stepAnalyze">→ Analyze reviews</span>
+                    <span class="workflow-step" id="stepResults">→ Movie recommendations</span>
+                </div>
+
+                {% if review_analysis %}
+                <section class="review-detector-block" id="reviewDetectorBlock" aria-labelledby="detectorHeading">
+                    <div class="detector-card">
+                        <h2 class="detector-title" id="detectorHeading">🛡️ Fake Review Detector</h2>
+                        <p class="detector-subtitle">
+                            Scanning community reviews for <strong>{{ input_movie_name }}</strong> before showing recommendations.
+                        </p>
+
+                        <div class="detector-loading" id="detectorLoading">
+                            <div class="detector-spinner" aria-hidden="true"></div>
+                            <span>Analyzing {{ review_analysis.total }} reviews…</span>
+                        </div>
+
+                        <div class="detector-results" id="detectorResults">
+                            <div class="detector-stats">
+                                <div class="stat-pill">
+                                    <span class="num">{{ review_analysis.total }}</span>
+                                    <span>Reviews scanned</span>
+                                </div>
+                                <div class="stat-pill trusted">
+                                    <span class="num">{{ review_analysis.trusted_count }}</span>
+                                    <span>Trusted</span>
+                                </div>
+                                <div class="stat-pill fake">
+                                    <span class="num">{{ review_analysis.fake_count }}</span>
+                                    <span>Likely fake</span>
+                                </div>
+                            </div>
+
+                            {% if review_analysis.trusted_reviews %}
+                            <h3 class="review-section-title">✓ Trusted reviews</h3>
+                            <div class="review-list">
+                                {% for review in review_analysis.trusted_reviews %}
+                                <article class="review-item trusted">
+                                    <div class="review-meta">
+                                        <span class="review-author">{{ review.author }}</span>
+                                        <span class="review-badge good">Likely real · {{ review.score_pct }}% suspicion</span>
+                                    </div>
+                                    <p class="review-text">{{ review.text }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if review_analysis.fake_reviews %}
+                            <h3 class="review-section-title">⚠ Flagged reviews</h3>
+                            <div class="review-list">
+                                {% for review in review_analysis.fake_reviews %}
+                                <article class="review-item fake">
+                                    <div class="review-meta">
+                                        <span class="review-author">{{ review.author }}</span>
+                                        <span class="review-badge bad">Likely fake · {{ review.score_pct }}%</span>
+                                    </div>
+                                    <p class="review-text">{{ review.text }}</p>
+                                    {% if review.reasons %}
+                                    <p class="review-reasons">Signals: {{ review.reasons|join:", " }}</p>
+                                    {% endif %}
+                                </article>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if review_analysis.has_fake_warning %}
+                            <div class="fake-warning-banner visible" id="fakeWarningBanner" role="alert">
+                                <strong>Fake review warning:</strong>
+                                About {{ review_analysis.fake_pct }}% of sampled reviews for this title look suspicious.
+                                Use the button below to view trusted recommendations.
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="show-recs-wrap" id="showRecsWrap">
+                            <button type="button" class="show-recs-btn" id="showRecsBtn">
+                                🎬 Movie Recommendations
+                            </button>
+                            <p class="show-recs-hint">Review analysis complete — click to see similar movies</p>
+                        </div>
+                    </div>
+                </section>
+                {% else %}
+                <div class="show-recs-wrap visible" id="showRecsWrap">
+                    <button type="button" class="show-recs-btn" id="showRecsBtn">
+                        🎬 Movie Recommendations
+                    </button>
+                </div>
+                {% endif %}
+
+                <section class="recommendations-section" id="recommendationsSection">
+                <header class="section-divider">
+                    <h2>Movies like <span class="searched-movie">{{ input_movie_name }}</span></h2>
+                    <p class="results-subtitle">
+                        {{ total_recommendations|default:"15" }} recommendations after review analysis
                     </p>
                 </header>
 
@@ -707,6 +1079,7 @@
                     <p>We couldn't find any recommendations for this movie. Please try another one.</p>
                 </div>
                 {% endif %}
+                </section>
             </div>
         </main>
     </div>
@@ -716,10 +1089,52 @@
         <p>Made with ❤️ for movie lovers | © <span id="currentYear"></span> Movie Recommendation System</p>
     </footer>
     <script>
-        // Set dynamic year in footer
         document.addEventListener("DOMContentLoaded", function() {
             var currentYear = new Date().getFullYear();
             document.getElementById("currentYear").textContent = currentYear;
+
+            var loading = document.getElementById("detectorLoading");
+            var results = document.getElementById("detectorResults");
+            var recSection = document.getElementById("recommendationsSection");
+            var stepAnalyze = document.getElementById("stepAnalyze");
+            var stepResults = document.getElementById("stepResults");
+
+            function markStep(el, state) {
+                if (!el) return;
+                el.classList.remove("active", "done");
+                if (state) el.classList.add(state);
+            }
+
+            var showRecsWrap = document.getElementById("showRecsWrap");
+            var showRecsBtn = document.getElementById("showRecsBtn");
+
+            function revealRecommendations() {
+                if (!recSection) return;
+                recSection.classList.add("revealed");
+                markStep(stepResults, "done");
+                if (showRecsWrap) showRecsWrap.style.display = "none";
+                setTimeout(function() {
+                    recSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
+            }
+
+            if (showRecsBtn) {
+                showRecsBtn.addEventListener("click", revealRecommendations);
+            }
+
+            if (loading && results) {
+                setTimeout(function() {
+                    loading.style.display = "none";
+                    results.classList.add("visible");
+                    markStep(stepAnalyze, "done");
+                    markStep(stepResults, "active");
+                    if (showRecsWrap) showRecsWrap.classList.add("visible");
+                }, 1800);
+            } else {
+                markStep(stepAnalyze, "done");
+                markStep(stepResults, "active");
+                if (showRecsWrap) showRecsWrap.classList.add("visible");
+            }
         });
     </script>
 

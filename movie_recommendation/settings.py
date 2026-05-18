@@ -30,6 +30,7 @@ ADMIN_ENABLED = os.environ.get('ADMIN_ENABLED', 'False').lower() in ('true', '1'
 
 # Application definition
 INSTALLED_APPS = [
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -229,3 +230,8 @@ Path(MODEL_DIR).mkdir(parents=True, exist_ok=True)
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# AI chat (optional): set CHAT_AI_PROVIDER=openai|gemini and API keys in environment
+CHAT_AI_PROVIDER = os.environ.get("CHAT_AI_PROVIDER", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "") or os.environ.get("GOOGLE_API_KEY", "")

@@ -1,282 +1,569 @@
-{% load static %}
+{%  load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Chatbot Movie Assistant | Movie Recommendation System</title>
+  <title>AI Chatbot Assistant | Movie Recommendation System</title>
   <link rel="shortcut icon" href="{% static 'logo.ico' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: rgba(30, 41, 59, 0.72);
-      --border: rgba(255,255,255,0.12);
-      --text: #f1f5f9;
-      --muted: #cbd5e1;
-      --accent: rgb(146, 224, 232);
-      --radius: 16px;
+      --page-bg: #e8f4f8;
+      --page-bg-soft: #f4fafc;
+      --card: rgba(255, 255, 255, 0.72);
+      --card-border: rgba(146, 224, 232, 0.45);
+      --text: #0f172a;
+      --text-soft: #475569;
+      --accent: #0d9488;
+      --accent-light: rgb(146, 224, 232);
+      --shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      font-family: 'DM Sans', system-ui, sans-serif;
       color: var(--text);
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--bg) 0%, #1a1f3a 100%);
-      background-image: url("{% static 'images/back4.jpg' %}");
+      background: var(--page-bg-soft);
+      background-image:
+    linear-gradient(
+        180deg,
+        rgba(63, 217, 217, 0.875) 0%,
+        rgba(62, 141, 161, 0.875) 40%,
+        rgba(83, 161, 187, 0.875) 100%
+    ),
+    url("{% static 'images/imgggg.png' %}");
+
+           
+          
+        background-repeat: no-repeat;
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
+      background-attachment: fixed;
+      
     }
-    .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 2rem 1rem 3rem;
+    .page-overlay {
+      min-height: 100vh;
+      
     }
-    .top {
+    .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
       flex-wrap: wrap;
-      margin-bottom: 1.25rem;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-    .title {
-      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
-      font-weight: 800;
-      margin: 0;
-      color: var(--accent);
-      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
-    .back {
+    .back-link {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.1rem;
+      gap: 0.45rem;
+      padding: 0.6rem 1.1rem;
       border-radius: 999px;
-      border: 1px solid var(--accent);
-      color: var(--accent);
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color:  black;
       text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
       font-weight: 700;
-      background: rgba(0,0,0,0.18);
-      backdrop-filter: blur(10px);
+      margin: 0 0 0.5rem;
+      color: rgb(4, 65, 75);;
+      letter-spacing: -0.02em;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      backdrop-filter: blur(14px);
-      overflow: hidden;
+    .hero p {
+      margin: 0 auto;
+      max-width: 640px;
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      line-height: 1.6;
+      color:  rgb(58, 51, 51);
+      font-weight: 500;
     }
-    .hint { color: var(--muted); margin: 0.4rem 0 1rem; }
-    .chat {
+    .features-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+    .features-section h2 {
+      text-align: center;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      color: rgb(3, 63, 72);;
+      margin: 0 0 1.75rem;
+      font-weight: 700;
+      font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    }
+    .features-grid {
       display: grid;
-      grid-template-rows: 1fr auto;
-      gap: 0.85rem;
-      min-height: 62vh;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
     }
-    .log {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(0,0,0,0.18);
-      padding: 1rem;
-      overflow: auto;
+    .feature-card-lg {
+      padding: 1.5rem 1.4rem;
+      border-radius: 20px;
+      background:  rgb(165, 249, 251);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      transition: transform 0.25s, box-shadow 0.25s;
     }
-    .msg {
-      display: grid;
-      gap: 0.25rem;
-      margin-bottom: 0.85rem;
-    }
-    .who { font-weight: 900; color: var(--accent); font-size: 0.9rem; }
-    .bubble {
-      padding: 0.75rem 0.9rem;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.40);
-      color: var(--text);
-      white-space: pre-wrap;
-      line-height: 1.55;
-    }
-    .bubble.user { background: rgba(146,224,232,0.12); }
-    .composer {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 0.65rem;
-      align-items: center;
-    }
-    input[type="text"]{
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.55);
-      color: var(--text);
-      padding: 0.85rem 0.95rem;
-      font-size: 1rem;
-      outline: none;
-    }
-    input[type="text"]:focus { border-color: rgba(146, 224, 232, 0.55); box-shadow: 0 0 0 3px rgba(146,224,232,0.14); }
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 0.85rem 1.05rem;
-      font-weight: 900;
+    .feature-card-lg.feature-clickable {
       cursor: pointer;
-      background: var(--accent);
-      color: #071018;
-      white-space: nowrap;
     }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 0.75rem;
-      margin-top: 0.65rem;
+    .feature-card-lg.feature-clickable:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
     }
-    .card {
-      border: 1px solid var(--border);
+    .feature-card-lg .icon {
+      font-size: 2.75rem;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .feature-card-lg h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .feature-card-lg p {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: var(--text-soft);
+      font-weight: 500;
+    }
+    .feature-card-lg a {
+      color: #0e7490;
+      font-weight: 600;
+    }
+    .chat-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+    .chat-section h2 {
+      text-align: center;
+      font-size: clamp(1.35rem, 3vw, 1.65rem);
+      color: #e5eef1;
+      margin: 0 0 1.25rem;
+    }
+    .chat-panel {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+    .chat-quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+    .chat-chip {
+      border: 1px solid var(--card-border);
+      background: rgba(146, 224, 232, 0.2);
+      color: #0e7490;
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .chat-chip:hover { background: rgba(146, 224, 232, 0.35); }
+    .chat-log {
+      min-height: 280px;
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 16px;
+      padding: 1rem;
+      background:  transparent;
+      margin-bottom: 1rem;
+    }
+    .chat-msg { margin-bottom: 1rem; }
+    .chat-msg-head {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0e7490;
+      margin-bottom: 0.25rem;
+    }
+    .chat-bubble {
+      display: inline-block;
+      max-width: 92%;
+      padding: 0.85rem 1rem;
       border-radius: 14px;
-      padding: 0.85rem;
-      background: rgba(0,0,0,0.12);
+      background: #fff;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      line-height: 1.55;
+      font-size: 1rem;
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .card-title { font-weight: 900; margin: 0 0 0.35rem; }
-    .card-meta { color: var(--muted); font-weight: 600; font-size: 0.9rem; }
-    .card a { color: var(--accent); text-decoration: none; font-weight: 800; }
+    .chat-msg.user .chat-bubble {
+      background: rgba(146, 224, 232, 0.35);
+      border-color: var(--card-border);
+    }
+    .chat-meta-tag {
+      display: inline-block;
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--text-soft);
+    }
+    .chat-typing {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      margin-bottom: 0.5rem;
+    }
+    .chat-composer {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 0.5rem;
+    }
+    .chat-input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: #fff;
+      color: var(--text);
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+    }
+    .chat-icon-btn, .chat-send-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .chat-icon-btn {
+      background: rgba(146, 224, 232, 0.4);
+      color: #0e7490;
+    }
+    .chat-send-btn {
+      background: #0e7490;
+      color: #fff;
+    }
+    .chat-send-btn:disabled { opacity: 0.5; }
+    .chat-voice-status { font-size: 0.85rem; color: var(--text-soft); min-height: 1.2rem; margin-top: 0.5rem; }
+    .chat-footer-actions { margin-top: 0.75rem; display: flex; gap: 1rem; }
+    .chat-link-btn {
+      background: none;
+      border: 0;
+      color: #0e7490;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.9rem;
+    }
+    .chat-movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .chat-movie-card {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #fff;
+    }
+    .chat-movie-card img { width: 100%; height: 150px; object-fit: cover; }
+    .chat-movie-body { padding: 0.65rem; }
+    .chat-movie-title { font-weight: 700; font-size: 0.95rem; margin: 0 0 0.25rem; }
+    .chat-movie-meta, .chat-movie-overview { font-size: 0.8rem; color: var(--text-soft); margin: 0 0 0.35rem; }
+    .chat-movie-actions a {
+      font-size: 0.75rem;
+      color: #0e7490;
+      margin-right: 0.35rem;
+    }
+    .chat-review-warn {
+      margin-top: 0.5rem;
+      padding: 0.6rem;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 0.88rem;
+    }
+    @media (max-width: 640px) {
+      .chat-composer { grid-template-columns: 1fr auto; }
+      .chat-icon-btn { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <h1 class="title">AI Chatbot Movie Assistant</h1>
-      <a class="back" href="/">← Back</a>
-    </div>
+  <div class="page-overlay">
+    <header class="top-bar">
+      <a href="{% url 'recommender:main' %}" class="back-link">← Back to search</a>
+    </header>
 
-    <div class="panel">
-      <p class="hint">Try: “Suggest thriller movies”, “Movies like Inception”, or paste a title.</p>
+    <section class="hero">
+      <h1>💬 AI Chatbot Assistant</h1>
+      <p>Your dedicated movie assistant — explore every feature below, then start chatting.</p>
+    </section>
 
-      <div class="chat">
-        <div id="log" class="log" aria-live="polite"></div>
-
-        <form id="composer" class="composer">
-          {% csrf_token %}
-          <input id="msg" type="text" placeholder="Ask for movies…" autocomplete="off" />
-          <button id="send" type="submit">Send</button>
-        </form>
+    <section class="features-section" id="features">
+      <h2>All features</h2>
+      <div class="features-grid">
+        <article class="feature-card-lg feature-clickable" data-prompt="Hello!"><span class="icon">💬</span><h3>Live chat</h3><p>Real-time messages between you and the assistant</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Suggest thriller movies"><span class="icon">🎭</span><h3>Genre recommendations</h3><p>"Suggest thriller movies" and more</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Movies like Inception"><span class="icon">🎬</span><h3>Similar movies</h3><p>"Movies like Inception" from our catalog</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="I'm feeling sad"><span class="icon">😊</span><h3>Mood-based picks</h3><p>Tell us how you feel — get matching films</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Recommend for me based on my history"><span class="icon">⭐</span><h3>Personalized</h3><p>Recommendations from your watch history</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Details about The Dark Knight"><span class="icon">📋</span><h3>Movie details</h3><p>Rating, genre, and full storyline</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Suggest action movies"><span class="icon">🖼️</span><h3>Movie posters</h3><p>Visual cards with poster images</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Movies like Inception"><span class="icon">▶️</span><h3>Trailers</h3><p>Quick links to watch trailers</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Where can I watch Joker"><span class="icon">📺</span><h3>Streaming info</h3><p>Where you might watch each title</p></article>
+  
+        <article class="feature-card-lg"><span class="icon">⌨️</span><h3>Typing indicator</h3><p>See when AI is composing a reply</p></article>
+        <article class="feature-card-lg feature-clickable" data-prompt="Hello!"><span class="icon">👋</span><h3>Greetings</h3><p>Friendly hello and small talk</p></article>
+        <article class="feature-card-lg"><span class="icon">⚡</span><h3>Real-time API</h3><p>Instant messaging with Fetch API</p></article>
+        <article class="feature-card-lg"><span class="icon">🤖</span><h3>OpenAI / Gemini</h3><p>Optional smarter AI via API keys</p></article>
+        <article class="feature-card-lg"><span class="icon">📈</span><h3>Analytics</h3><p><a href="{% url 'recommender:admin_dashboard' %}">View admin dashboard</a></p></article>
       </div>
-    </div>
+    </section>
+
+    <section class="chat-section" id="chat">
+      <h2>Start chatting</h2>
+      <div class="chat-panel">
+        {% csrf_token %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="chat-quick-prompts">
+          <button type="button" class="chat-chip" data-prompt="Hello!">👋 Hi</button>
+          <button type="button" class="chat-chip" data-prompt="Suggest thriller movies">🎭 Thrillers</button>
+          <button type="button" class="chat-chip" data-prompt="Movies like Inception">🎬 Like Inception</button>
+          <button type="button" class="chat-chip" data-prompt="I'm feeling sad">😢 Mood</button>
+          <button type="button" class="chat-chip" data-prompt="Fake reviews for The Dark Knight">🛡️ Fake reviews</button>
+        </div>
+        <div id="chatLog" class="chat-log" aria-live="polite"></div>
+        <div id="chatTyping" class="chat-typing" hidden><span>AI is typing…</span></div>
+        <form id="chatForm" class="chat-composer">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Ask about movies…" autocomplete="off" />
+          <button type="button" id="chatVoiceBtn" class="chat-icon-btn" title="Voice">🎤</button>
+          <button type="button" id="chatSpeakBtn" class="chat-icon-btn" title="Read aloud">🔊</button>
+          <button type="submit" id="chatSendBtn" class="chat-send-btn">Send</button>
+        </form>
+        <p id="chatVoiceStatus" class="chat-voice-status"></p>
+        <div class="chat-footer-actions">
+          <button type="button" id="chatClearBtn" class="chat-link-btn">Clear chat</button>
+          <a href="{% url 'recommender:admin_dashboard' %}" class="chat-link-btn">Analytics</a>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
+  document.addEventListener('DOMContentLoaded', function () {
     function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-          var cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
+      var v = null;
+      if (document.cookie) {
+        document.cookie.split(';').forEach(function (c) {
+          c = c.trim();
+          if (c.indexOf(name + '=') === 0) v = decodeURIComponent(c.substring(name.length + 1));
+        });
       }
-      return cookieValue;
+      return v;
     }
-
     async function postJson(url, payload) {
-      const csrftoken = getCookie('csrftoken');
-      const res = await fetch(url, {
+      var res = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrftoken || ''
-        },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '' },
         body: JSON.stringify(payload || {})
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data && data.error ? data.error : 'Request failed');
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Request failed');
       return data;
     }
+    var log = document.getElementById('chatLog');
+    var typing = document.getElementById('chatTyping');
+    var form = document.getElementById('chatForm');
+    var input = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('chatSendBtn');
+    var voiceBtn = document.getElementById('chatVoiceBtn');
+    var speakBtn = document.getElementById('chatSpeakBtn');
+    var voiceStatus = document.getElementById('chatVoiceStatus');
+    var clearBtn = document.getElementById('chatClearBtn');
+    var lastBotText = '';
 
-    const log = document.getElementById('log');
-    const form = document.getElementById('composer');
-    const input = document.getElementById('msg');
-    const sendBtn = document.getElementById('send');
+    function scrollLog() { log.scrollTop = log.scrollHeight; }
 
-    function addMessage(who, text, items) {
-      const wrap = document.createElement('div');
-      wrap.className = 'msg';
-
-      const whoEl = document.createElement('div');
-      whoEl.className = 'who';
-      whoEl.textContent = who;
-
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble' + (who === 'You' ? ' user' : '');
-      bubble.textContent = text || '';
-
-      wrap.appendChild(whoEl);
-      wrap.appendChild(bubble);
-
-      if (Array.isArray(items) && items.length) {
-        const cards = document.createElement('div');
-        cards.className = 'cards';
-
-        items.slice(0, 10).forEach(it => {
-          const c = document.createElement('div');
-          c.className = 'card';
-          const t = document.createElement('div');
-          t.className = 'card-title';
-          t.textContent = it.title || 'Movie';
-          const m = document.createElement('div');
-          m.className = 'card-meta';
-          const parts = [];
-          if (it.rating) parts.push(it.rating);
-          if (it.genres) parts.push(it.genres);
-          if (it.release_date) parts.push(it.release_date);
-          m.textContent = parts.join(' • ');
-          c.appendChild(t);
-          if (m.textContent) c.appendChild(m);
-          if (it.google_link) {
-            const a = document.createElement('a');
-            a.href = it.google_link;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.textContent = 'Open';
-            c.appendChild(document.createElement('div')).appendChild(a);
-          }
-          cards.appendChild(c);
-        });
-        wrap.appendChild(cards);
-      }
-
-      log.appendChild(wrap);
-      log.scrollTop = log.scrollHeight;
+    function renderMovieCards(items) {
+      if (!items || !items.length) return null;
+      var grid = document.createElement('div');
+      grid.className = 'chat-movie-grid';
+      items.slice(0, 8).forEach(function (it) {
+        var card = document.createElement('article');
+        card.className = 'chat-movie-card';
+        if (it.poster_url) {
+          var img = document.createElement('img');
+          img.src = it.poster_url;
+          img.alt = it.title || 'Movie';
+          img.loading = 'lazy';
+          card.appendChild(img);
+        }
+        var body = document.createElement('div');
+        body.className = 'chat-movie-body';
+        var h = document.createElement('h3');
+        h.className = 'chat-movie-title';
+        h.textContent = it.title || 'Movie';
+        body.appendChild(h);
+        var meta = document.createElement('p');
+        meta.className = 'chat-movie-meta';
+        var parts = [];
+        if (it.rating) parts.push(it.rating);
+        if (it.genres) parts.push(it.genres);
+        meta.textContent = parts.join(' · ');
+        if (meta.textContent) body.appendChild(meta);
+        if (it.overview) {
+          var ov = document.createElement('p');
+          ov.className = 'chat-movie-overview';
+          ov.textContent = it.overview;
+          body.appendChild(ov);
+        }
+        var actions = document.createElement('div');
+        actions.className = 'chat-movie-actions';
+        if (it.trailer_url) {
+          var a = document.createElement('a');
+          a.href = it.trailer_url; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = 'Trailer';
+          actions.appendChild(a);
+        }
+        if (actions.children.length) body.appendChild(actions);
+        card.appendChild(body);
+        grid.appendChild(card);
+      });
+      return grid;
     }
 
-    addMessage('Assistant', 'Ask me for movies by genre, or say “Movies like <title>”.', []);
+    function appendMessage(role, text, extras) {
+      var wrap = document.createElement('article');
+      wrap.className = 'chat-msg' + (role === 'user' ? ' user' : '');
+      var head = document.createElement('p');
+      head.className = 'chat-msg-head';
+      head.textContent = role === 'user' ? 'You' : 'Assistant';
+      var bubble = document.createElement('p');
+      bubble.className = 'chat-bubble';
+      bubble.textContent = text || '';
+      wrap.appendChild(head);
+      wrap.appendChild(bubble);
+      if (extras && extras.sentiment) {
+        var tag = document.createElement('span');
+        tag.className = 'chat-meta-tag';
+        tag.textContent = 'Sentiment: ' + extras.sentiment.label;
+        wrap.appendChild(tag);
+      }
+      if (extras && extras.review_analysis && extras.review_analysis.has_fake_warning) {
+        var w = document.createElement('p');
+        w.className = 'chat-review-warn';
+        w.textContent = 'Fake review warning: ~' + extras.review_analysis.fake_pct + '% suspicious.';
+        wrap.appendChild(w);
+      }
+      if (extras && extras.items && extras.items.length) {
+        var cards = renderMovieCards(extras.items);
+        if (cards) wrap.appendChild(cards);
+      }
+      log.appendChild(wrap);
+      scrollLog();
+      if (role === 'bot') lastBotText = text;
+    }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const message = (input.value || '').trim();
-      if (!message) return;
+    async function sendMessage(text) {
+      text = (text || '').trim();
+      if (!text) return;
+      appendMessage('user', text, null);
       input.value = '';
-      addMessage('You', message, []);
       sendBtn.disabled = true;
+      typing.hidden = false;
       try {
-        const res = await postJson('/api/chat/', { message });
-        addMessage('Assistant', res.text || 'Done.', res.items || []);
+        var res = await postJson('/api/chat/', { message: text });
+        await new Promise(function (r) { setTimeout(r, Math.min(res.typing_ms || 900, 2000)); });
+        typing.hidden = true;
+        appendMessage('bot', res.text, { items: res.items, sentiment: res.sentiment, review_analysis: res.review_analysis });
       } catch (err) {
-        addMessage('Assistant', (err && err.message) ? err.message : 'Something went wrong.', []);
+        typing.hidden = true;
+        appendMessage('bot', err.message || 'Error', null);
       } finally {
         sendBtn.disabled = false;
         input.focus();
       }
+    }
+
+    form.addEventListener('submit', function (e) { e.preventDefault(); sendMessage(input.value); });
+    document.querySelectorAll('.chat-chip').forEach(function (btn) {
+      btn.addEventListener('click', function () { sendMessage(btn.getAttribute('data-prompt')); });
     });
+    document.querySelectorAll('.feature-card-lg.feature-clickable').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var prompt = card.getAttribute('data-prompt');
+        if (prompt) {
+          document.getElementById('chat').scrollIntoView({ behavior: 'smooth' });
+          sendMessage(prompt);
+        }
+      });
+    });
+    clearBtn.addEventListener('click', async function () {
+      await postJson('/api/chat/clear/', {});
+      log.innerHTML = '';
+      appendMessage('bot', 'Chat cleared.', null);
+    });
+
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR && voiceBtn) {
+      var rec = new SR();
+      rec.lang = 'en-US';
+      voiceBtn.addEventListener('click', function () { voiceStatus.textContent = 'Listening…'; rec.start(); });
+      rec.onresult = function (ev) {
+        var t = ev.results[0][0].transcript;
+        input.value = t;
+        sendMessage(t);
+      };
+    } else if (voiceBtn) voiceBtn.disabled = true;
+
+    if (speakBtn && window.speechSynthesis) {
+      speakBtn.addEventListener('click', function () {
+        if (!lastBotText) return;
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(lastBotText));
+      });
+    }
+
+    fetch('/api/chat/history/').then(function (r) { return r.json(); }).then(function (data) {
+      if (data.history && data.history.length) {
+        data.history.forEach(function (h) {
+          appendMessage(h.role === 'user' ? 'user' : 'bot', h.content, null);
+        });
+      } else {
+        appendMessage('bot', 'Welcome! Scroll up to see all features, or ask me anything below.', null);
+      }
+    }).catch(function () {
+      appendMessage('bot', 'Welcome! Ask me about movies, genres, moods, or reviews.', null);
+    });
+  });
   </script>
 </body>
 </html>
-

@@ -6,7 +6,6 @@ import logging
 import os
 import threading
 from pathlib import Path
-from turtle import title
 from typing import Dict, List, Optional
 from difflib import get_close_matches
 
@@ -16,16 +15,28 @@ from scipy.sparse import load_npz
 import json
 from django.conf import settings
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 
-from .fake_review import analyze_review_text
+from .fake_review import analyze_review_text, analyze_movie_reviews
 from .chat_assistant import handle_message
+from .sentiment import analyze_sentiment, sentiment_to_dict
+
+try:
+    from .models import ChatLog, ReviewCheckLog
+except Exception:
+    ChatLog = None
+    ReviewCheckLog = None
 
  
 
 logger = logging.getLogger(__name__)
+
+
+def _get_ai_provider() -> str:
+    return (os.environ.get("CHAT_AI_PROVIDER") or getattr(settings, "CHAT_AI_PROVIDER", "") or "").strip().lower()
+
 
 # Global cache for recommender system
 _RECOMMENDER = None
@@ -275,15 +286,40 @@ def main(request):
             }
         )
     
+    query_movie = result['query_movie']
+    search_hist = request.session.get("search_history", [])
+    if not isinstance(search_hist, list):
+        search_hist = []
+    if query_movie not in search_hist:
+        search_hist.append(query_movie)
+    request.session["search_history"] = search_hist[-30:]
+    request.session.modified = True
+
+    session_reviews = request.session.get("reviews", {})
+    extra = []
+    if isinstance(session_reviews, dict):
+        user_entry = session_reviews.get(query_movie)
+        if isinstance(user_entry, dict) and (user_entry.get("review") or "").strip():
+            extra.append(
+                {
+                    "author": "You",
+                    "text": user_entry["review"],
+                    "source": "your review",
+                }
+            )
+
+    review_analysis = analyze_movie_reviews(query_movie, extra_reviews=extra or None)
+
     return render(
         request,
         'recommender/result.html',
         {
             'all_movie_names': titles_list,
-            'input_movie_name': result['query_movie'],
+            'input_movie_name': query_movie,
             'source_movie': result['source_movie'],
             'recommended_movies': result['recommendations'],
             'total_recommendations': len(result['recommendations']),
+            'review_analysis': review_analysis,
         }
     )
 
@@ -370,14 +406,13 @@ def health_check(request):
 
 @require_http_methods(["GET"])
 def fake_review_page(request):
-    """UI page for fake review detection."""
-    return render(request, "recommender/fake_review.html")
+    """Redirect: fake review detection runs automatically after movie search."""
+    return redirect("recommender:main")
 
 
 @require_http_methods(["GET"])
 def chat_assistant_page(request):
-    """UI page for AI Chatbot Movie Assistant."""
-    # Start loading model early so the assistant is responsive.
+    """Dedicated AI Chatbot Assistant page (separate from home search)."""
     _start_model_loading()
     return render(request, "recommender/assistant.html")
 
@@ -391,10 +426,27 @@ def _json_body(request):
 
 @require_http_methods(["POST"])
 def fake_review_api(request):
-    """API: analyze a review and return fake/real + reasons."""
+    """API: analyze one review or all reviews for a movie title."""
     payload = _json_body(request)
     if payload is None:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    movie_title = (payload.get("movie_title") or payload.get("title") or "").strip()
+    if movie_title:
+        session_reviews = request.session.get("reviews", {})
+        extra = []
+        if isinstance(session_reviews, dict):
+            user_entry = session_reviews.get(movie_title)
+            if isinstance(user_entry, dict) and (user_entry.get("review") or "").strip():
+                extra.append(
+                    {
+                        "author": "You",
+                        "text": user_entry["review"],
+                        "source": "your review",
+                    }
+                )
+        analysis = analyze_movie_reviews(movie_title, extra_reviews=extra or None)
+        return JsonResponse(analysis)
 
     text = (payload.get("text") or "").strip()
     result = analyze_review_text(text)
@@ -491,9 +543,94 @@ def review_api(request):
     )
 
 
+def _session_chat_context(request) -> Dict:
+    history = request.session.get("chat_history", [])
+    if not isinstance(history, list):
+        history = []
+    return {
+        "chat_history": history,
+        "watched_titles": request.session.get("watched_titles", []) or [],
+        "search_history": request.session.get("search_history", []) or [],
+        "reviews": request.session.get("reviews", {}) or {},
+    }
+
+
+def _append_chat_history(request, user_msg: str, bot_msg: str, intent: str = ""):
+    history = request.session.get("chat_history", [])
+    if not isinstance(history, list):
+        history = []
+    history.append({"role": "user", "content": user_msg, "intent": ""})
+    history.append({"role": "bot", "content": bot_msg, "intent": intent})
+    request.session["chat_history"] = history[-40:]
+    request.session.modified = True
+
+
+def _log_chat(request, role: str, message: str, intent: str = "", sentiment: str = ""):
+    if ChatLog is None:
+        return
+    try:
+        ChatLog.objects.create(
+            session_key=request.session.session_key or "anonymous",
+            role=role,
+            message=message[:4000],
+            intent=intent or "",
+            sentiment=sentiment or "",
+        )
+    except Exception as e:
+        logger.debug("ChatLog save skipped: %s", e)
+
+
+def _log_review_check(title: str, snippet: str, label: str, score: float, sentiment: str = ""):
+    if ReviewCheckLog is None:
+        return
+    try:
+        ReviewCheckLog.objects.create(
+            movie_title=title[:255],
+            review_snippet=snippet[:2000],
+            label=label,
+            score=score,
+            sentiment=sentiment,
+        )
+    except Exception as e:
+        logger.debug("ReviewCheckLog save skipped: %s", e)
+
+
+@require_http_methods(["GET"])
+def chat_history_api(request):
+    """Return stored chat messages for conversational memory."""
+    history = request.session.get("chat_history", [])
+    if not isinstance(history, list):
+        history = []
+    return JsonResponse(
+        {
+            "ok": True,
+            "history": history,
+            "ai_provider": _get_ai_provider(),
+            "ai_enabled": bool(_get_ai_provider()),
+        }
+    )
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def chat_clear_api(request):
+    """Clear chat history in session."""
+    request.session["chat_history"] = []
+    request.session.modified = True
+    return JsonResponse(
+        {
+            "ok": True,
+            "history": [],
+            "ai_provider": _get_ai_provider(),
+            "ai_enabled": bool(_get_ai_provider()),
+        }
+    )
+
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def chat_assistant_api(request):
-    """API: chat assistant using the local recommender model."""
+    """API: real-time chat — recommendations, mood, fake reviews, sentiment, memory."""
     payload = _json_body(request)
     if payload is None:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -502,16 +639,105 @@ def chat_assistant_api(request):
     if not message:
         return JsonResponse({"error": "Missing message"}, status=400)
 
-    # Ensure model starts loading (if not already).
+    if not request.session.session_key:
+        request.session.save()
+
+    user_sentiment = sentiment_to_dict(analyze_sentiment(message))
+    _log_chat(request, "user", message, sentiment=user_sentiment.get("label", ""))
+
     _start_model_loading()
     recommender = _get_recommender()
 
-    resp = handle_message(recommender, message, n=10)
+    use_ai = payload.get("use_ai", True)
+    resp = handle_message(
+        recommender,
+        message,
+        n=int(payload.get("n") or 8),
+        session_context=_session_chat_context(request),
+        use_ai=bool(use_ai),
+    )
+
+    _append_chat_history(request, message, resp.text, resp.intent)
+    _log_chat(
+        request,
+        "bot",
+        resp.text,
+        intent=resp.intent,
+        sentiment=(resp.sentiment or {}).get("label", ""),
+    )
+
+    if resp.review_analysis:
+        ra = resp.review_analysis
+        if ra.get("label") and ra.get("score") is not None:
+            _log_review_check(
+                ra.get("movie_title", ""),
+                message[:500],
+                ra.get("label", ""),
+                float(ra.get("score") or 0),
+                user_sentiment.get("label", ""),
+            )
+        elif ra.get("movie_title"):
+            _log_review_check(
+                ra.get("movie_title", ""),
+                "batch scan",
+                "fake" if ra.get("has_fake_warning") else "real",
+                float(ra.get("fake_pct") or 0) / 100.0,
+                user_sentiment.get("label", ""),
+            )
+
+    provider = _get_ai_provider()
     return JsonResponse(
         {
             "ok": True,
             "intent": resp.intent,
             "text": resp.text,
             "items": resp.items,
+            "sentiment": resp.sentiment or user_sentiment,
+            "review_analysis": resp.review_analysis,
+            "typing_ms": resp.typing_ms,
+            "extras": resp.extras,
+            "ai_enabled": bool(provider),
+            "ai_provider": provider,
+            "use_ai": bool(use_ai),
         }
+    )
+
+
+@require_http_methods(["GET"])
+def admin_dashboard(request):
+    """Analytics dashboard for chatbot and review checks."""
+    chat_total = chat_user = chat_bot = 0
+    review_total = review_fake = 0
+    recent_chats = []
+    recent_reviews = []
+    intent_counts = {}
+
+    if ChatLog is not None:
+        chat_total = ChatLog.objects.count()
+        chat_user = ChatLog.objects.filter(role="user").count()
+        chat_bot = ChatLog.objects.filter(role="bot").count()
+        recent_chats = list(ChatLog.objects.all()[:20])
+        from django.db.models import Count
+
+        for row in ChatLog.objects.exclude(intent="").values("intent").annotate(c=Count("id")).order_by("-c")[:8]:
+            intent_counts[row["intent"]] = row["c"]
+
+    if ReviewCheckLog is not None:
+        review_total = ReviewCheckLog.objects.count()
+        review_fake = ReviewCheckLog.objects.filter(label="fake").count()
+        recent_reviews = list(ReviewCheckLog.objects.all()[:15])
+
+    return render(
+        request,
+        "recommender/admin_dashboard.html",
+        {
+            "chat_total": chat_total,
+            "chat_user": chat_user,
+            "chat_bot": chat_bot,
+            "review_total": review_total,
+            "review_fake": review_fake,
+            "recent_chats": recent_chats,
+            "recent_reviews": recent_reviews,
+            "intent_counts": intent_counts,
+        },
     )

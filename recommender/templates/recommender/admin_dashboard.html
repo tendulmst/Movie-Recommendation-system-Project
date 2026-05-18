@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chatbot and Review Analytics</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+    h1 { color: rgb(146, 224, 232); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1rem; }
+    .num { font-size: 2rem; font-weight: 800; color: rgb(146, 224, 232); }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+    th, td { border: 1px solid #334155; padding: 0.5rem 0.65rem; text-align: left; }
+    th { background: #1e293b; }
+    a { color: rgb(146, 224, 232); }
+  </style>
+</head>
+<body>
+  <section class="wrap">
+    <h1>Chatbot and Review Analytics</h1>
+    <p><a href="/">Home</a> | <a href="/admin/">Django Admin</a></p>
+    <section class="grid">
+      <article class="card"><span class="num">{{ chat_total }}</span><p>Chat log entries</p></article>
+      <article class="card"><span class="num">{{ chat_user }}</span><p>User messages</p></article>
+      <article class="card"><span class="num">{{ chat_bot }}</span><p>Bot replies</p></article>
+      <article class="card"><span class="num">{{ review_total }}</span><p>Review checks</p></article>
+      <article class="card"><span class="num">{{ review_fake }}</span><p>Flagged fake</p></article>
+    </section>
+    {% if intent_counts %}
+    <h2>Top intents</h2>
+    <ul>{% for intent, count in intent_counts.items %}<li>{{ intent }}: {{ count }}</li>{% endfor %}</ul>
+    {% endif %}
+    <h2>Recent chats</h2>
+    <table>
+      <thead><tr><th>Time</th><th>Role</th><th>Intent</th><th>Message</th></tr></thead>
+      <tbody>
+        {% for row in recent_chats %}
+        <tr><td>{{ row.created_at }}</td><td>{{ row.role }}</td><td>{{ row.intent }}</td><td>{{ row.message|truncatechars:120 }}</td></tr>
+        {% empty %}<tr><td colspan="4">No chat logs yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <h2>Recent review checks</h2>
+    <table>
+      <thead><tr><th>Time</th><th>Movie</th><th>Label</th><th>Score</th></tr></thead>
+      <tbody>
+        {% for row in recent_reviews %}
+        <tr><td>{{ row.created_at }}</td><td>{{ row.movie_title }}</td><td>{{ row.label }}</td><td>{{ row.score }}</td></tr>
+        {% empty %}<tr><td colspan="4">No review checks yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>
